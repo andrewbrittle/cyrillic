@@ -520,8 +520,9 @@ $('chart-body').addEventListener('pointerdown',e=>{
 $('chart-body').addEventListener('pointermove',e=>{
   if(peek.timer&&(Math.abs(e.clientX-peek.x)>PEEK_MOVE_TOLERANCE||Math.abs(e.clientY-peek.y)>PEEK_MOVE_TOLERANCE))endPeek();
 });
-['pointerup','pointercancel','lostpointercapture'].forEach(t=>$('chart-body').addEventListener(t,endPeek));
-window.addEventListener('scroll',endPeek,{passive:true});
+// once the bubble is up, stop the page scrolling under the finger (otherwise the browser cancels the touch and the bubble vanishes)
+$('chart-body').addEventListener('touchmove',e=>{if(peek.on&&e.cancelable)e.preventDefault()},{passive:false});
+['pointerup','pointercancel'].forEach(t=>$('chart-body').addEventListener(t,endPeek));
 $('chart-body').addEventListener('contextmenu',e=>e.preventDefault());
 
 // ---------- nav ----------
