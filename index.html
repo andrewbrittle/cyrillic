@@ -110,6 +110,14 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding-block:
 .next-btn:hover{border-color:var(--border-hover)}
 .btn-primary{padding:13px;border-radius:var(--radius);background:var(--accent);border:none;color:var(--on-accent);font-size:14px;font-weight:700;cursor:pointer;width:100%}
 
+.settings-btn{flex-shrink:0;width:30px;height:30px;border-radius:99px;border:1px solid var(--border);background:transparent;color:var(--text-muted);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.settings-btn:hover{border-color:var(--border-hover);color:var(--text)}
+.tip{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.5rem}
+.tip-h{font-size:15px;font-weight:700}
+.tip p{font-size:14px;line-height:1.5;color:var(--text-muted)}
+.tip-ex{display:flex;flex-wrap:wrap;gap:6px}
+.tip-ex span{background:var(--surface2);border-radius:8px;padding:5px 9px;font-size:13px;font-weight:600;color:var(--text-muted)}
+.tip-ex b{color:var(--text);font-weight:700;margin-right:5px}
 .section-divider{height:1px;background:var(--accent);opacity:.45;margin:.25rem 0}
 .group-head{display:flex;align-items:baseline;justify-content:space-between;gap:.5rem}
 .group-name{font-size:15px;font-weight:700}
@@ -138,19 +146,21 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding-block:
 <header>
   <div class="app-heading-row">
     <div class="app-heading"><span class="tap" lang="bg">Кирилица</span> <span>drill</span></div>
+    <button class="settings-btn" id="theme-btn" aria-label="Switch light or dark" title="Light / dark"></button>
   </div>
   <div class="nav-row">
     <div class="nav-pills" role="tablist">
-      <button class="nav-pill active" id="nav-letters" data-mode="letters" lang="bg">букви</button>
+      <button class="nav-pill active" id="nav-chart" data-mode="chart" lang="bg">азбука</button>
+      <button class="nav-pill" id="nav-letters" data-mode="letters" lang="bg">букви</button>
       <button class="nav-pill" id="nav-reverse" data-mode="reverse" lang="bg">звуци</button>
       <button class="nav-pill" id="nav-words" data-mode="words" lang="bg">табели</button>
-      <button class="nav-pill" id="nav-chart" data-mode="chart" lang="bg">азбука</button>
+      <button class="nav-pill" id="nav-tips" data-mode="tips" lang="bg">съвети</button>
     </div>
   </div>
 </header>
 
 <main>
-  <div class="screen" id="screen-drill">
+  <div class="screen" id="screen-drill" hidden>
     <div>
       <div class="page-title" id="drill-title">Letters</div>
       <div class="page-sub" id="drill-sub">See the letter, pick the sound</div>
@@ -171,7 +181,7 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding-block:
     <div id="next-wrap"></div>
   </div>
 
-  <div class="screen" id="screen-chart" hidden>
+  <div class="screen" id="screen-chart">
     <div>
       <div class="page-title">Alphabet</div>
       <div class="page-sub">Shaded by how well you know each letter. Tap one for its sound.</div>
@@ -179,7 +189,42 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding-block:
     <div class="stats-row" id="counts"></div>
     <div class="detail" id="detail" hidden></div>
     <div id="chart-body" style="display:flex;flex-direction:column;gap:.85rem"></div>
-    <div class="note"><strong>Reading tips.</strong> Most signs are in capitals, so learn those first. Ъ is the one that looks odd in names: Търново is Tarnovo, България is Balgaria. Words ending ‑ия end ‑ia in Latin, so София is Sofia.</div>
+    <div class="note">More reading shortcuts are on the <strong lang="bg">съвети</strong> (tips) page.</div>
+  </div>
+  <div class="screen" id="screen-tips" hidden>
+    <div>
+      <div class="page-title">Reading tips</div>
+      <div class="page-sub">Shortcuts that make signs and names click faster</div>
+    </div>
+    <div class="tip"><div class="tip-h">Every letter is said</div>
+      <p>No silent letters and no spelling surprises. Say each letter in turn and you've read the word.</p></div>
+    <div class="tip"><div class="tip-h">‑ИЯ at the end is ‑ia</div>
+      <p>The Latin spelling writes it ‑ia, and it sounds like "ee‑ya".</p>
+      <div class="tip-ex"><span><b lang="bg">СОФИЯ</b>Sofia</span><span><b lang="bg">БЪЛГАРИЯ</b>Bulgaria</span></div></div>
+    <div class="tip"><div class="tip-h">‑ЦИЯ is English ‑tion</div>
+      <p>Lots of borrowed words end this way. If you can read ‑ЦИЯ, you can guess the English word.</p>
+      <div class="tip-ex"><span><b lang="bg">ПОЛИЦИЯ</b>police</span><span><b lang="bg">ИНФОРМАЦИЯ</b>information</span><span><b lang="bg">РЕЦЕПЦИЯ</b>reception</span></div></div>
+    <div class="tip"><div class="tip-h">Many signs are English in disguise</div>
+      <p>Sound a word out before assuming you don't know it.</p>
+      <div class="tip-ex"><span><b lang="bg">ХОТЕЛ</b>hotel</span><span><b lang="bg">ПАРКИНГ</b>parking</span><span><b lang="bg">ТЕАТЪР</b>theatre</span><span><b lang="bg">СУПЕРМАРКЕТ</b>supermarket</span></div></div>
+    <div class="tip"><div class="tip-h">Ъ is "uh" but written a</div>
+      <p>It's the most common letter you won't recognise. In Latin spellings it becomes a.</p>
+      <div class="tip-ex"><span><b lang="bg">ЦЕНТЪР</b>tsentar</span><span><b lang="bg">ТЪРНОВО</b>Tarnovo</span></div></div>
+    <div class="tip"><div class="tip-h">Щ is "sht"</div>
+      <p>In Russian it's "shch", but in Bulgarian it's always "sht".</p>
+      <div class="tip-ex"><span><b lang="bg">ЛЕТИЩЕ</b>letishte, airport</span><span><b lang="bg">ПЛОЩАД</b>ploshtad, square</span></div></div>
+    <div class="tip"><div class="tip-h">Address shorthand</div>
+      <p>Street signs and maps abbreviate these, usually before the name.</p>
+      <div class="tip-ex"><span><b lang="bg">ул.</b>street</span><span><b lang="bg">бул.</b>boulevard</span><span><b lang="bg">пл.</b>square</span><span><b lang="bg">Св.</b>Saint</span></div></div>
+    <div class="tip"><div class="tip-h">Surnames come in pairs</div>
+      <p>Men's names end ‑ов or ‑ев, and women's add an ‑а.</p>
+      <div class="tip-ex"><span><b lang="bg">Иванов</b>Ivanov</span><span><b lang="bg">Иванова</b>Ivanova</span><span><b lang="bg">Петрова</b>Petrova</span></div></div>
+    <div class="tip"><div class="tip-h">Handwriting and fancy fonts look different</div>
+      <p>On menus, shopfronts and in italics, lower case can change shape. д can look like g, т like m, and и like u. Capitals stay the same, so read those first.</p></div>
+    <div class="tip"><div class="tip-h">Check yourself with the Latin</div>
+      <p>Metro and main street signs in Sofia often show the Latin spelling too. Read the Cyrillic first, then look down to check.</p></div>
+    <div class="tip"><div class="tip-h">Yes and no</div>
+      <p>Traditionally a nod means no and a shake means yes. Many people in Sofia switch for visitors, so go by the words: <span lang="bg">да</span> is yes and <span lang="bg">не</span> is no.</p></div>
   </div>
 </main>
 
@@ -241,6 +286,7 @@ const WORDS=[
  ['ХЛЯБ','bread'],['ВОДА','water'],['БИРА','beer'],['ВИНО','wine'],['ЧАЙ','tea'],
  ['ШОПСКА САЛАТА','shopska salad'],['БАНИЦА','banitsa (cheese pastry)'],['ЦЕНА','price'],['ЕВРО','euro'],
  ['МУЗЕЙ','museum'],['ЦЪРКВА','church'],['ПОЛИЦИЯ','police'],['БОЛНИЦА','hospital'],
+ ['ХОТЕЛ','hotel'],['ПАРКИНГ','parking'],['ИНФОРМАЦИЯ','information'],['ТЕАТЪР','theatre'],
  ['ЗДРАВЕЙТЕ','hello'],['БЛАГОДАРЯ','thank you'],['МОЛЯ','please'],['ДА','yes'],['НЕ','no'],
 ];
 const TR={А:'a',Б:'b',В:'v',Г:'g',Д:'d',Е:'e',Ж:'zh',З:'z',И:'i',Й:'y',К:'k',Л:'l',М:'m',Н:'n',О:'o',П:'p',Р:'r',С:'s',Т:'t',У:'u',Ф:'f',Х:'h',Ц:'ts',Ч:'ch',Ш:'sh',Щ:'sht',Ъ:'a',Ь:'y',Ю:'yu',Я:'ya'};
@@ -290,7 +336,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 const $=id=>document.getElementById(id);
 
 // ---------- state ----------
-let mode='letters',groupsOn={same:true,false:true,new:true},lower=false,last=null;
+let mode='chart',groupsOn={same:true,false:true,new:true},lower=false,last=null;
 let session={right:0,wrong:0,streak:0};
 const TITLES={
   letters:['Letters','See the letter, pick the sound'],
@@ -400,7 +446,7 @@ function askWord(k){
 
 // keyboard: 1-4 to answer, Enter/space for next or reveal
 document.addEventListener('keydown',e=>{
-  if(mode==='chart')return;
+  if(mode==='chart'||mode==='tips')return;
   const n=parseInt(e.key,10);
   if(n>=1&&n<=4){const b=$('answer').querySelectorAll('.opt[data-v]')[n-1];if(b&&!b.disabled)b.click()}
 });
@@ -442,8 +488,10 @@ document.querySelector('.nav-pills').addEventListener('click',e=>{
   const b=e.target.closest('.nav-pill');if(!b)return;
   mode=b.dataset.mode;last=null;
   document.querySelectorAll('.nav-pill').forEach(x=>x.classList.toggle('active',x===b));
-  $('screen-drill').hidden=mode==='chart';$('screen-chart').hidden=mode!=='chart';
+  $('screen-drill').hidden=mode==='chart'||mode==='tips';$('screen-chart').hidden=mode!=='chart';$('screen-tips').hidden=mode!=='tips';
+  window.scrollTo(0,0);
   if(mode==='chart'){renderChart();return}
+  if(mode==='tips')return;
   $('drill-title').textContent=TITLES[mode][0];$('drill-sub').textContent=TITLES[mode][1];
   renderFilters();next();
 });
@@ -454,10 +502,17 @@ $('reset').onclick=()=>{
   if(!armed){armed=true;b.textContent='Tap again to reset';b.classList.add('arm');
     setTimeout(()=>{armed=false;b.textContent='Reset scores';b.classList.remove('arm')},3000);return}
   S={};save();session={right:0,wrong:0,streak:0};armed=false;b.textContent='Reset scores';b.classList.remove('arm');
-  if(mode==='chart')renderChart();else next();
+  if(mode==='chart')renderChart();else if(mode!=='tips')next();
 };
 
-renderFilters();next();
+// light / dark (dark by default, like the Japanese drill)
+const THEME_KEY='bg-cyrillic-theme';
+function applyTheme(t){document.documentElement.setAttribute('data-theme',t);$('theme-btn').textContent=t==='dark'?'☾':'☀'}
+let theme='dark';try{theme=localStorage.getItem(THEME_KEY)||'dark'}catch(e){}
+applyTheme(theme);
+$('theme-btn').onclick=()=>{theme=theme==='dark'?'light':'dark';applyTheme(theme);try{localStorage.setItem(THEME_KEY,theme)}catch(e){}};
+
+renderChart();
 </script>
 
 </body>
