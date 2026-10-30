@@ -118,6 +118,16 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding-block:
 .tip-ex{display:flex;flex-wrap:wrap;gap:6px}
 .tip-ex span{background:var(--surface2);border-radius:8px;padding:5px 9px;font-size:13px;font-weight:600;color:var(--text-muted)}
 .tip-ex b{color:var(--text);font-weight:700;margin-right:5px}
+.progress-wrap{display:flex;align-items:center;gap:12px}
+.progress-bar-bg{flex:1;height:3px;background:var(--surface2);border-radius:99px;overflow:hidden}
+.progress-bar-fill{height:3px;border-radius:99px;background:var(--accent);transition:width .3s}
+.progress-text{font-size:12px;font-weight:700;color:var(--text-dim);font-variant-numeric:tabular-nums;white-space:nowrap}
+.done-title{font-size:22px;font-weight:700;margin-bottom:.4rem}
+.done-score{font-size:44px;font-weight:700;color:var(--accent);line-height:1.1;font-variant-numeric:tabular-nums}
+.done-sub{font-size:14px;font-weight:600;color:var(--text-muted);margin-top:.4rem}
+.done-missed{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:1rem}
+.done-missed span{background:var(--red-dim);color:var(--red);border-radius:8px;padding:4px 9px;font-size:18px;font-weight:700}
+.done-actions{display:flex;flex-direction:column;gap:8px}
 .section-divider{height:1px;background:var(--accent);opacity:.45;margin:.25rem 0}
 .group-head{display:flex;align-items:baseline;justify-content:space-between;gap:.5rem}
 .group-name{font-size:15px;font-weight:700}
@@ -179,6 +189,7 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding-block:
       <div class="prod-bar" id="bar"></div>
       <div class="bar-caption"><span id="bar-left"></span><span id="bar-right"></span></div>
     </div>
+    <div class="progress-wrap"><div class="progress-bar-bg"><div class="progress-bar-fill" id="run-fill" style="width:0%"></div></div><span class="progress-text" id="run-text"></span></div>
     <div class="card" id="card"></div>
     <div id="answer"></div>
     <div class="feedback" id="feedback"></div>
@@ -326,21 +337,15 @@ function confidenceBand(score){
 const BANDS=['neg3','neg2','neg1','neutral','pos1','pos2','pos3','pos4'];
 const scoreOf=k=>S[k]?S[k].score:undefined;
 const scoreClass=k=>{const b=confidenceBand(scoreOf(k));return b?'score-'+b:''};
-// weaker and untested items come up more often
-function weight(k){const s=scoreOf(k);return s===undefined?2:0.3+(2-s)/1.5}
-function pick(keys,avoid){
-  const pool=keys.length>1?keys.filter(k=>k!==avoid):keys;
-  let tot=pool.reduce((a,k)=>a+weight(k),0),r=Math.random()*tot;
-  for(const k of pool){r-=weight(k);if(r<=0)return k}
-  return pool[pool.length-1];
-}
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const $=id=>document.getElementById(id);
 
 // ---------- state ----------
-let mode='chart',groupsOn={same:true,false:true,new:true},lower=false,last=null;
+let mode='chart',groupsOn={same:true,false:true,new:true},lower=false;
 let session={right:0,wrong:0,streak:0};
+// a run goes through every item in the chosen set once, in random order, then stops
+let run={deck:[],pos:0,missed:[]};
 const TITLES={
   letters:['Letters','See the letter, pick the sound'],
   reverse:['Sounds','Hear the sound, pick the letter'],
@@ -365,7 +370,7 @@ $('filters').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
   if(b.dataset.low)lower=!lower;
   else{const g=b.dataset.g;groupsOn[g]=!groupsOn[g];if(!Object.values(groupsOn).some(Boolean))groupsOn[g]=true}
-  renderFilters();next();
+  renderFilters();startRun();
 });
 
 function renderStats(){
@@ -376,12 +381,39 @@ function renderStats(){
   $('bar').innerHTML=BANDS.slice().reverse().map(b=>`<i style="width:${pct(n[b])};background:var(--conf-${b}-bar)"></i>`).join('')+`<i style="width:${pct(untested)};background:var(--conf-untested-bar)"></i>`;
   $('bar-left').textContent=`${known} of ${keys.length} solid`;
   $('bar-right').textContent=untested?`${untested} not tried yet`:'all tried';
+  const total=run.deck.length,done=Math.min(run.pos,total);
+  $('run-fill').style.width=(total?done/total*100:0)+'%';
+  $('run-text').textContent=`${done} / ${total}`;
+}
+
+function startRun(keys){
+  run={deck:shuffle((keys||itemKeys()).slice()),pos:0,missed:[]};
+  session={right:0,wrong:0,streak:0};
+  next();
+}
+function noteMissed(k){if(!run.missed.includes(k))run.missed.push(k)}
+function label(k){return k.startsWith('w:')?k.slice(2):k.slice(2)}
+function showDone(){
+  renderStats();
+  const total=run.deck.length,m=run.missed;
+  $('feedback').className='feedback';$('feedback').innerHTML='';$('next-wrap').innerHTML='';
+  $('card').innerHTML=`<div class="done-title">Run complete</div><div class="done-score">${session.right} / ${total}</div>`+
+    `<div class="done-sub">${m.length?`${m.length} to look at again`:'Every one right first time'}</div>`+
+    (m.length?`<div class="done-missed" lang="bg">${m.map(k=>`<span>${esc(label(k))}</span>`).join('')}</div>`:'');
+  $('answer').innerHTML=`<div class="done-actions">`+
+    (m.length?`<button class="btn-primary" id="again-missed">Repeat the ${m.length} I missed</button>`:'')+
+    `<button class="${m.length?'next-btn':'btn-primary'}" id="again-all">Repeat all ${total}</button></div>`;
+  if(m.length)$('again-missed').onclick=()=>startRun(m);
+  $('again-all').onclick=()=>startRun();
+  ($('again-missed')||$('again-all')).focus();
 }
 
 function next(){
   renderStats();
   $('feedback').className='feedback';$('feedback').innerHTML='';$('next-wrap').innerHTML='';
-  const k=pick(itemKeys(),last);last=k;
+  if(run.pos>=run.deck.length)return showDone();
+  const k=run.deck[run.pos];
+  renderStats();
   if(mode==='words')return askWord(k);
   const L=LETTERS.find(l=>l[0]===k.slice(2));
   mode==='reverse'?askReverse(k,L):askLetter(k,L);
@@ -415,6 +447,7 @@ function showNext(){
 }
 
 function tally(ok){
+  run.pos++;
   if(ok){session.right++;session.streak++}else{session.wrong++;session.streak=0}
 }
 
@@ -424,7 +457,7 @@ function bindOpts(k,L,correct){
 function answer(b,k,L,correct){
   if(b.disabled)return;
   const ok=b.dataset.v===correct;
-  record(k,ok);tally(ok);
+  record(k,ok);tally(ok);if(!ok)noteMissed(k);
   $('answer').querySelectorAll('.opt').forEach(x=>{x.disabled=true;if(x.dataset.v===correct)x.classList.add('correct')});
   if(!ok)b.classList.add('wrong');
   const fb=$('feedback');fb.className='feedback '+(ok?'good':'bad');
@@ -443,7 +476,7 @@ function askWord(k){
     $('card').innerHTML=`<div class="word-display" lang="bg">${W[0]}</div><div class="reveal-rd">${esc(translit(W[0]))}</div><div class="reveal-en">${esc(W[1])}</div>`;
     $('answer').innerHTML=`<div class="options"><button class="opt wrong" id="miss">Missed it</button><button class="opt correct" id="got">Read it</button></div>`;
     $('got').onclick=()=>{record(k,true);tally(true);next()};
-    $('miss').onclick=()=>{record(k,false);tally(false);next()};
+    $('miss').onclick=()=>{record(k,false);tally(false);noteMissed(k);next()};
   };
 }
 
@@ -528,14 +561,14 @@ $('chart-body').addEventListener('contextmenu',e=>e.preventDefault());
 // ---------- nav ----------
 document.querySelector('.nav-pills').addEventListener('click',e=>{
   const b=e.target.closest('.nav-pill');if(!b)return;
-  mode=b.dataset.mode;last=null;
+  mode=b.dataset.mode;
   document.querySelectorAll('.nav-pill').forEach(x=>x.classList.toggle('active',x===b));
   $('screen-drill').hidden=mode==='chart'||mode==='tips';$('screen-chart').hidden=mode!=='chart';$('screen-tips').hidden=mode!=='tips';
   window.scrollTo(0,0);
   if(mode==='chart'){renderChart();return}
   if(mode==='tips')return;
   $('drill-title').textContent=TITLES[mode][0];$('drill-sub').textContent=TITLES[mode][1];
-  renderFilters();next();
+  renderFilters();startRun();
 });
 
 let armed=false;
@@ -543,8 +576,8 @@ $('reset').onclick=()=>{
   const b=$('reset');
   if(!armed){armed=true;b.textContent='Tap again to reset';b.classList.add('arm');
     setTimeout(()=>{armed=false;b.textContent='Reset scores';b.classList.remove('arm')},3000);return}
-  S={};save();session={right:0,wrong:0,streak:0};armed=false;b.textContent='Reset scores';b.classList.remove('arm');
-  if(mode==='chart')renderChart();else if(mode!=='tips')next();
+  S={};save();armed=false;b.textContent='Reset scores';b.classList.remove('arm');
+  if(mode==='chart')renderChart();else if(mode!=='tips')startRun();
 };
 
 // light / dark (dark by default, like the Japanese drill)
