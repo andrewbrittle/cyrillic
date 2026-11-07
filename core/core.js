@@ -2068,13 +2068,14 @@ function getScoreKey(q) {
 
 // halfCredit (Portuguese build): a typed answer with the right letters but
 // slipped accents - counts, at half the boost, like a hinted answer.
-// production (2026-10-24, the principle "scoring must
-// never punish trying the hard thing"): a typed or said-out-loud answer that
-// misses never lowers the score - a right one still raises it - so the hard
-// modes are never a risk to your greens.
+// production: an answer you typed or said yourself rather than picked.
+// 2026-10-24 ("scoring must never punish trying the hard thing"): a miss
+// never lowered the score. 2026-11-07: it costs a little (0.25, against 0.75
+// for a wrong pick) - small enough that the hard modes are no risk to your
+// greens and owning up in Say mode is cheap, but not nothing, or a miss
+// would mean nothing.
 function recordKanaResult(q, correct, halfCredit, production) {
   if (!isTrackedItem(q)) return;
-  if (production && !correct) return;
   const key = getScoreKey(q);
   const isConsistencyItem = questionType(q).scoring === 'consistency';
   // Numbers/time track many sub-answers under one key (numbers-consistency /
@@ -2085,7 +2086,7 @@ function recordKanaResult(q, correct, halfCredit, production) {
   // correct answers now earn less than wrong answers cost, so a single slip
   // takes more than one lucky guess to fully undo.
   const correctIncrement = isConsistencyItem ? 0.1 : 0.5;
-  const wrongIncrement = isConsistencyItem ? 0.1 : 0.75;
+  const wrongIncrement = isConsistencyItem ? 0.1 : production ? 0.25 : 0.75;
   // Optional (off by default): a correct answer only counts for half as much
   // if the hint/speak button was used first - wrong answers always cost the
   // full amount regardless, since that part was never in question.
