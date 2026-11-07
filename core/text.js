@@ -20,7 +20,7 @@ function tx(key, vars) {
   if (v === undefined) { console.warn('missing text: ' + key); return key; }
   if (typeof v === 'object') v = v[UI_PLURALS.select(vars && vars.n)] || v.other;
   // {target} is always the language being learnt, in the learner's language.
-  const all = Object.assign({ target: window.UI_TEXT['lang.' + (window.LANG && LANG.id)] || window.UI_TEXT['target.name'] }, vars);
+  const all = Object.assign({ target: window.UI_TEXT['lang.' + (window.LANG && LANG.id)] }, vars);
   return v.replace(/\{(\w+)\}/g, (m, k) => (k in all ? all[k] : m));
 }
 function applyPageText(root) {

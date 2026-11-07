@@ -1,6 +1,6 @@
 {
   "id": "./bg-cyrillic",
-  "name": "Кирилица drill (core test)",
+  "name": "Кирилица drill",
   "short_name": "Кирилица",
   "description": "Bulgarian Cyrillic: letters, sounds and signs to read.",
   "start_url": "./",

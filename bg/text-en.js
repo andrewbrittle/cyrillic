@@ -1,6 +1,5 @@
 // Bulgarian Cyrillic - this app's own interface text in English, added to
-// the shared table (ui/en.js). The shared table also has Portuguese-only
-// entries for now - splitting it per app is on the list for Japanese.
+// the core's table (ui/en.js), as pt/text-en.js does for Portuguese.
 Object.assign(window.UI_TEXT, {
   "bg.alphabet": "Alphabet",
   "bg.alphabetSub": "Shaded by how well you know each letter. Hold one to see and hear it.",
