@@ -95,7 +95,7 @@ window.UI_TEXT = {
   "results.hintsUsed": {"one": "{n} hint used", "other": "{n} hints used"},
   "results.keepDrilling": "Keep drilling!",
   "results.noMistakes": "No mistakes — excellent!",
-  "results.repeatMissed": { "one": "Repeat the {n} I missed", "other": "Repeat the {n} I missed" },
+  "results.drillMissed": "Drill missed only",
   "results.perfect": "Perfect score!",
   "say.also": "Also: {w}",
   "say.gotIt": "Got it",

@@ -2,6 +2,7 @@
 // cyrillic branch; the warm-up for Japanese). Same shape as pt/app.js.
 window.APP = {
   storagePrefix: 'bgDrill',
+  latestChangelog: '2026-11-07a',
   backupName: 'bulgarian-drill-backup',
   vocabTabLabel: 'думи',
   vocabPills: [],
