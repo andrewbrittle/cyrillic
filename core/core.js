@@ -1985,12 +1985,47 @@ function showSettingsScreen() {
 
 /* ---------- Confidence tracking (on-device only, no sync) ---------- */
 const KANA_SCORE_KEY = APP.storagePrefix + 'KanaScores';
+
+// LINKED SCORES (2026-11-09, the kanji joining-up): an app can share some
+// scores with another app on the same site (APP.linkedScores: { prefix,
+// storageKey }). Every score key starting with the prefix - Japanese's
+// 'card:<n>' - is read from and written to that other app's store (Kanji
+// Cards' kanjiCardsScores, keyed by the card id), so a drill in either app
+// moves the same score. Everything else reads kanaScores exactly as before:
+// the store below is wrapped, not changed, and listing it (backups, counts)
+// still sees only this app's own keys. A change made in the other app in
+// another tab is picked up as it happens (the storage event).
+const LINKED_SCORES = APP.linkedScores || null;
+let linkedScores = {};
+function loadLinkedScores() {
+  if (!LINKED_SCORES) return;
+  try { linkedScores = JSON.parse(localStorage.getItem(LINKED_SCORES.storageKey)) || {}; } catch (e) { linkedScores = {}; }
+}
+function saveLinkedScores() {
+  if (!LINKED_SCORES) return;
+  try { localStorage.setItem(LINKED_SCORES.storageKey, JSON.stringify(linkedScores)); } catch (e) { /* storage full or blocked */ }
+}
+function linkScoreStore(store) {
+  if (!LINKED_SCORES || typeof Proxy === 'undefined') return store;
+  const pre = LINKED_SCORES.prefix;
+  const linked = k => typeof k === 'string' && k.startsWith(pre);
+  return new Proxy(store, {
+    get: (t, k) => linked(k) ? linkedScores[k.slice(pre.length)] : t[k],
+    set: (t, k, v) => { if (linked(k)) { linkedScores[k.slice(pre.length)] = v; saveLinkedScores(); } else t[k] = v; return true; },
+    has: (t, k) => linked(k) ? k.slice(pre.length) in linkedScores : k in t,
+    deleteProperty: (t, k) => { if (linked(k)) { delete linkedScores[k.slice(pre.length)]; saveLinkedScores(); } else delete t[k]; return true; },
+  });
+}
+loadLinkedScores();
+if (LINKED_SCORES) window.addEventListener('storage', e => { if (e.key === LINKED_SCORES.storageKey) loadLinkedScores(); });
+
 let kanaScores = {};
 try {
   kanaScores = JSON.parse(localStorage.getItem(KANA_SCORE_KEY)) || {};
 } catch (e) {
   kanaScores = {};
 }
+kanaScores = linkScoreStore(kanaScores);
 
 // One-off migration (2026-09-01): every entry used to be a bare number.
 // DECAY (see decayedScore() below) needs to know when a score was last
@@ -2033,6 +2068,9 @@ function saveKanaScores() {
 function downloadScoresBackup() {
   // With the sentence builder's part scores, where the app has a builder.
   const parts = typeof sbParts !== 'undefined' ? { __parts: sbParts, __partsR: sbPartsR } : {};
+  // And the scores shared with another app (Japanese: the kanji, shared with
+  // Kanji Cards), so one backup holds everything this app drills.
+  if (LINKED_SCORES) parts.__linked = linkedScores;
   const data = JSON.stringify(Object.assign({}, kanaScores, parts));
   const blob = new Blob([data], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -2082,7 +2120,16 @@ function handleRestoreFileSelected(event) {
       if (parsed.__partsR && typeof parsed.__partsR === 'object') sbPartsR = parsed.__partsR;
       sbSaveParts();
     }
-    delete parsed.__prod; delete parsed.__parts; delete parsed.__partsR;
+    // Shared scores are merged, not replaced: the other app may have moved
+    // them since the backup, so for each one the more recent wins.
+    if (LINKED_SCORES && parsed.__linked && typeof parsed.__linked === 'object') {
+      Object.keys(parsed.__linked).forEach(k => {
+        const b = parsed.__linked[k], cur = linkedScores[k];
+        if (b && typeof b === 'object' && (!cur || (b.lastSeen || 0) > (cur.lastSeen || 0))) linkedScores[k] = b;
+      });
+      saveLinkedScores();
+    }
+    delete parsed.__prod; delete parsed.__parts; delete parsed.__partsR; delete parsed.__linked;
     // Same bare-number -> {score,lastSeen} normalisation the app runs on
     // load (see above KANA_SCORE_KEY) - cheap and idempotent, and protects
     // against restoring an old-shape export without duplicating the whole
@@ -2092,7 +2139,7 @@ function handleRestoreFileSelected(event) {
         parsed[key] = { score: parsed[key], lastSeen: Date.now() };
       }
     });
-    kanaScores = parsed;
+    kanaScores = linkScoreStore(parsed);
     saveKanaScores();
     showBackupStatus(tx('backup.restored'), false);
   };

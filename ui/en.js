@@ -135,6 +135,16 @@ window.UI_TEXT = {
   "sb.titleChallenge": "Sentence challenge",
   "sb.titleReading": "Reading challenge",
 
+  // ---------- The character picker (core/picker.js) ----------
+  "picker.selectAll": "Select all — {name}",
+  "picker.deselectAll": "Deselect all — {name}",
+  "picker.pickAll": "Pick all {n}",
+  "picker.pickedAll": "Picked: all {n}",
+  "picker.start": "Start · {what}",
+  "picker.pickSome": "Pick some to start",
+  "picker.rowLabel": "Pick the {row} row",
+  "picker.nCharacters": { "one": "{n} character", "other": "{n} characters" },
+
   // ---------- Reading a script (core/script.js) ----------
   "script.letters": "Letters",
   "script.reading": "Reading",

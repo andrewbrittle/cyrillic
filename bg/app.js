@@ -7,7 +7,7 @@ window.APP = {
   vocabTabLabel: 'думи',
   vocabPills: [],
   screens: {
-    script: { root: true, pill: 'nav-script', onShow: () => renderScriptChart(document.getElementById('script-chart')) },
+    script: { root: true, pill: 'nav-script', onShow: () => bgShowPicker() },
     tips: { root: true, pill: 'nav-tips' },
   },
   onStart: [() => bgImportOldScores(), () => showScreen('script')],
@@ -55,13 +55,30 @@ window.APP = {
 };
 // Every word in the lists, for the sign-reading drill.
 function bgReadItems() { return getCoreVocabPool(); }
-function bgStartLetters(reverse) {
-  const groups = [...document.querySelectorAll('#script-filters [data-g].active')].map(b => b.dataset.g);
-  startLetterDrill(reverse, groups.length ? groups : null);
-}
-function bgToggleGroup(btn) {
-  btn.classList.toggle('active');
-  if (!document.querySelector('#script-filters [data-g].active')) btn.classList.add('active');
+// The alphabet in the core's character picker (2026-11-09, as Japanese's
+// kana): a group's Pick all, single letters, or Select all; the direction
+// above; hold a letter to see and hear it. Shaded by the weaker of its two
+// directions, as the chart was.
+let bgPicker = null, bgReverse = false;
+function bgShowPicker() {
+  if (bgPicker) { bgPicker.refresh(); return; }
+  const S = APP.script;
+  const esc = escapeHtmlText;
+  bgPicker = renderPicker(document.getElementById('script-picker'), {
+    name: tx('bg.alphabet'),
+    unitKey: 'script.nLetters',
+    sections: Object.entries(S.groups).map(([g, label]) => {
+      const ls = S.letters.filter(l => l.group === g), rows = [];
+      for (let i = 0; i < ls.length; i += 4) rows.push({ items: ls.slice(i, i + 4).map(L => ({
+        id: L.char, char: esc(L.char) + '<small>' + esc(L.lower || '') + '</small>', sub: L.sound, letter: L,
+        band: () => { const sc = letterChartScore(L); return sc === null ? '' : confidenceBand(sc) || ''; },
+        peek: tile => attachTilePeek(tile, { jp: L.char + ' ' + (L.lower || ''), en: L.howItSounds, note: L.sound, speakAs: L.char, noReading: true }),
+      })) });
+      return { key: g, label: esc(label), cols: 4, rows };
+    }),
+    direction: { options: [{ key: 'f', label: tx('bg.drillLetters') }, { key: 'r', label: tx('bg.drillSounds') }], get: () => bgReverse ? 'r' : 'f', set: k => { bgReverse = k === 'r'; } },
+    start: (items, dir) => startLetterDrill(dir === 'r', null, items.map(it => it.letter)),
+  });
 }
 
 // One-off (2026-11-07): bring across the scores from the original single-file

@@ -12,7 +12,7 @@
 // on activate this deletes every OTHER cache with its own prefix, and apps
 // published under the same github.io address share one cache store - a
 // shared prefix would let this app wipe the Japanese apps' offline copies.
-const CACHE_VERSION = 'bg-core-v261108-001';
+const CACHE_VERSION = 'bg-core-v261109-001';
 
 const PRECACHE_URLS = [
   './',
@@ -23,6 +23,7 @@ const PRECACHE_URLS = [
   './bg/text-en.js',
   './bg/vocab.js',
   './core/core.js',
+  './core/picker.js',
   './core/questions.js',
   './core/script.js',
   './core/start.js',
