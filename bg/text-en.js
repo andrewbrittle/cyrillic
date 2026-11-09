@@ -2,6 +2,8 @@
 // the core's table (ui/en.js), as pt/text-en.js does for Portuguese.
 Object.assign(window.UI_TEXT, {
   "bg.alphabet": "Alphabet",
+  "bg.lowerCase": "Lower case too",
+  "bg.lowerCaseSub": "About half the letters shown as а б в instead of А Б В, either way round",
   "bg.alphabetSub": "Shaded by how well you know each letter. Tap letters, or a group's Pick all, to drill them. Hold one to see and hear it.",
   "bg.drillLetters": "Letters → sounds",
   "bg.drillSounds": "Sounds → letters",

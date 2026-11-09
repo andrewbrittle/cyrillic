@@ -2,6 +2,8 @@
 // cyrillic branch; the warm-up for Japanese). Same shape as pt/app.js.
 window.APP = {
   storagePrefix: 'bgDrill',
+  // Lower case too (2026-11-09): some letters shown as а б в in a drill.
+  settings: { scriptLowerCase: false },
   latestChangelog: '2026-11-07a',
   backupName: 'bulgarian-drill-backup',
   vocabTabLabel: 'думи',
@@ -77,6 +79,18 @@ function bgShowPicker() {
       return { key: g, label: esc(label), cols: 4, rows };
     }),
     direction: { options: [{ key: 'f', label: tx('bg.drillLetters') }, { key: 'r', label: tx('bg.drillSounds') }], get: () => bgReverse ? 'r' : 'f', set: k => { bgReverse = k === 'r'; } },
+    // Lower case too: until 9 Nov every drilled letter was a capital - the
+    // drill could show lower case (core/script.js) but nothing switched it on.
+    extras: el => {
+      const card = document.createElement('div');
+      card.className = 'group-card' + (appSettings.scriptLowerCase ? ' selected' : '');
+      card.style.cursor = 'pointer';
+      card.innerHTML = '<div class="group-info"><div class="group-name"></div><div class="group-count"></div></div><div class="toggle"></div>';
+      card.querySelector('.group-name').textContent = tx('bg.lowerCase');
+      card.querySelector('.group-count').textContent = tx('bg.lowerCaseSub');
+      card.onclick = () => { appSettings.scriptLowerCase = !appSettings.scriptLowerCase; saveSettings(); card.classList.toggle('selected', appSettings.scriptLowerCase); };
+      el.appendChild(card);
+    },
     start: (items, dir) => startLetterDrill(dir === 'r', null, items.map(it => it.letter)),
   });
 }
