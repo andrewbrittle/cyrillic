@@ -1078,7 +1078,7 @@
       <button class="start-btn" onclick="downloadScoresBackup()" data-t="page.download-backup"></button>
       <button class="start-btn" onclick="shareScoresBackup()" data-t="page.share-backup"></button>
       <button class="start-btn" onclick="triggerRestoreFilePicker()" data-t="page.restore-from-backup"></button>
-      <input type="file" id="restore-file-input" accept="application/json,.json" style="display:none;" onchange="handleRestoreFileSelected(event)">
+      <input type="file" id="restore-file-input" accept="application/json,.json,text/plain,.txt" style="display:none;" onchange="handleRestoreFileSelected(event)">
       <div class="backup-status-msg" id="backup-status-msg"></div>
     </div>
 
@@ -1094,7 +1094,7 @@
       <div class="backup-status-msg" id="private-vocab-msg"></div>
     </div>
 
-    <div style="text-align:center; font-size:12px; font-weight:600; color:var(--text-dim); margin-top:0.75rem;">v261112.001</div>
+    <div style="text-align:center; font-size:12px; font-weight:600; color:var(--text-dim); margin-top:0.75rem;">v261112.002</div>
   </div>
 
 
@@ -1350,21 +1350,21 @@
 <!-- The course vocabulary (2026-10-08) - must load before the app script below. -->
 <!-- The word lists, then the language module (as window.LANG), then the
      core and this app's files in order (see the Portuguese page's notes). -->
-<script src="bg/vocab.js?v=261112.001"></script>
+<script src="bg/vocab.js?v=261112.002"></script>
 <script type="module">
-import bg from './lang/bg.js?v=261112.001';
+import bg from './lang/bg.js?v=261112.002';
 window.LANG = bg;
 </script>
-<script defer src="ui/en.js?v=261112.001"></script>
-<script defer src="bg/text-en.js?v=261112.001"></script>
-<script defer src="core/text.js?v=261112.001"></script>
-<script defer src="bg/app.js?v=261112.001"></script>
-<script defer src="bg/starter.js?v=261112.001"></script>
-<script defer src="core/core.js?v=261112.001"></script>
-<script defer src="core/picker.js?v=261112.001"></script>
-<script defer src="core/starter.js?v=261112.001"></script>
-<script defer src="core/questions.js?v=261112.001"></script>
-<script defer src="core/script.js?v=261112.001"></script>
-<script defer src="core/start.js?v=261112.001"></script>
+<script defer src="ui/en.js?v=261112.002"></script>
+<script defer src="bg/text-en.js?v=261112.002"></script>
+<script defer src="core/text.js?v=261112.002"></script>
+<script defer src="bg/app.js?v=261112.002"></script>
+<script defer src="bg/starter.js?v=261112.002"></script>
+<script defer src="core/core.js?v=261112.002"></script>
+<script defer src="core/picker.js?v=261112.002"></script>
+<script defer src="core/starter.js?v=261112.002"></script>
+<script defer src="core/questions.js?v=261112.002"></script>
+<script defer src="core/script.js?v=261112.002"></script>
+<script defer src="core/start.js?v=261112.002"></script>
 </body>
 </html>
